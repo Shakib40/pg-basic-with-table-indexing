@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: PG-CRUD-with-Indexing

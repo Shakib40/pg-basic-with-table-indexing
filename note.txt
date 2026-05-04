@@ -1,0 +1,79 @@
+// Basic CRUD operations with indexing
+// Basic CRUD operations without indexing
+
+#Schema
+1. USERS
+2. ORDERS
+3. ACTIVITY_LOG 
+
+
+
+#Database
+1. postgres
+2. redis
+
+
+#Swagger
+#Docker
+
+
+Endpoints:
+1a. /auth-basic
+   1. generate-token
+   2. validate-token
+   3. refresh-token
+   4. logout
+1b. /auth-with-indexing
+   1. generate-token
+   2. validate-token
+   3. refresh-token
+   4. logout
+
+2a. /users-basic
+   1. create
+   2. get
+   3. update
+   4. delete
+
+2b. /users-with-indexing
+   1. create
+   2. get
+   3. update
+   4. delete
+
+
+3a. /orders-basic
+   1. create
+   2. get
+   3. update
+   4. delete
+
+3b. /orders-with-indexing
+   1. create
+   2. get
+   3. update
+   4. delete
+
+4a. /activity-log-basic
+   1. get
+   2. filter
+   3. search
+   4. export
+
+4b. /activity-log-with-indexing
+   1. get
+   2. filter
+   3. search
+   4. export
+
+
+
+
+
+/users-with-indexing
+   1. create
+   2. get
+   3. upload-file
+
+/users-basic
+   1. get
