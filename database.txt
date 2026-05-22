@@ -1,0 +1,47 @@
+# command to start the database
+docker compose up -d postgres
+
+# Database Connection Details
+# Host: localhost
+# Port: 5432
+# Database: pg_crud_db
+# Username: postgres
+# Password: password
+
+# command to connect via psql inside docker container
+docker exec -it pg-crud-postgres psql -U postgres -d pg_crud_db
+
+
+
+
+# command to list all tables
+\dt
+
+
+# query to check all tables in the database
+select * from users;
+
+# indexing by username column
+create index idx_users_username on users(username);
+
+# indexing by email column
+create index idx_users_email on users(email);
+
+# indexing by phone_number column
+create index idx_users_phone_number on users(phone_number);
+
+# indexing by status column
+create index idx_users_status on users(status);
+
+# indexing by created_at column
+create index idx_users_created_at on users(created_at);
+
+# indexing by updated_at column
+create index idx_users_updated_at on users(updated_at);
+
+
+
+select * from orders;
+select * from activity_log;
+
+select * from users where id = 1;
