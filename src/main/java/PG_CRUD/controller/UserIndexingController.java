@@ -25,8 +25,7 @@ public class UserIndexingController {
     @PostMapping("/create")
     @Operation(summary = "Create a new user", description = "Create a new user with indexing support")
     public ResponseEntity<User> createUser(
-            @Parameter(description = "User object to be created", required = true)
-            @RequestBody User user) {
+            @Parameter(description = "User object to be created", required = true) @RequestBody User user) {
         try {
             User createdUser = userService.createUser(user, null);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -38,11 +37,10 @@ public class UserIndexingController {
     @GetMapping("/get/{id}")
     @Operation(summary = "Get user by ID", description = "Retrieve a user by their ID with optimized indexing")
     public ResponseEntity<User> getUserById(
-            @Parameter(description = "ID of the user to retrieve", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
         return user.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/get")
@@ -55,13 +53,12 @@ public class UserIndexingController {
     @PostMapping("/upload-file")
     @Operation(summary = "Upload file for users", description = "Upload a file containing user data")
     public ResponseEntity<String> uploadFile(
-            @Parameter(description = "File to upload", required = true)
-            @RequestParam("file") MultipartFile file) {
+            @Parameter(description = "File to upload", required = true) @RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {
                 return new ResponseEntity<>("Please select a file to upload", HttpStatus.BAD_REQUEST);
             }
-            
+
             // Process file upload logic here
             String message = "File uploaded successfully: " + file.getOriginalFilename();
             return new ResponseEntity<>(message, HttpStatus.OK);

@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,10 +32,49 @@ public class UserBasicController {
     @GetMapping("/get/{id}")
     @Operation(summary = "Get user by ID", description = "Retrieve a user by their ID")
     public ResponseEntity<User> getUserById(
-            @Parameter(description = "ID of the user to retrieve", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
         return user.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/create")
+    @Operation(summary = "Create a new user", description = "Create a new user in the system")
+    public ResponseEntity<User> createUser(
+            @RequestBody User user, 
+            HttpServletRequest request) {
+        try {
+            User createdUser = userService.createUser(user, request);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/update/{id}")
+    @Operation(summary = "Update an existing user", description = "Update user details by ID")
+    public ResponseEntity<User> updateUser(
+            @Parameter(description = "ID of the user to update", required = true) @PathVariable Long id,
+            @RequestBody User userDetails,
+            HttpServletRequest request) {
+        try {
+            User updatedUser = userService.updateUser(id, userDetails, request);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Delete a user", description = "Delete a user by their ID")
+    public ResponseEntity<Void> deleteUser(
+            @Parameter(description = "ID of the user to delete", required = true) @PathVariable Long id,
+            HttpServletRequest request) {
+        try {
+            userService.deleteUser(id, request);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
