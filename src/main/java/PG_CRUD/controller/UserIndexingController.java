@@ -12,7 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @RestController
 @RequestMapping("/users-with-indexing")
@@ -50,20 +58,96 @@ public class UserIndexingController {
         return ResponseEntity.ok(users);
     }
 
-    @PostMapping("/upload-file")
+   @PostMapping("/upload-file")
     @Operation(summary = "Upload file for users", description = "Upload a file containing user data")
     public ResponseEntity<String> uploadFile(
-            @Parameter(description = "File to upload", required = true) @RequestParam("file") MultipartFile file) {
-        try {
-            if (file.isEmpty()) {
-                return new ResponseEntity<>("Please select a file to upload", HttpStatus.BAD_REQUEST);
+            @Parameter(description = "File to upload", required = true)
+            @RequestParam("file") MultipartFile file) {
+
+    try {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please select a file to upload");
+        }
+
+        // Validate file type
+        String contentType = file.getContentType();
+        if (!"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                .equals(contentType)) {
+            return ResponseEntity.badRequest().body("Only .xlsx format is supported");
+        }
+
+        // Read Excel file
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            if (sheet.getPhysicalNumberOfRows() == 0) {
+                return ResponseEntity.badRequest().body("Excel file is empty");
             }
 
-            // Process file upload logic here
-            String message = "File uploaded successfully: " + file.getOriginalFilename();
-            return new ResponseEntity<>(message, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Failed to upload file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            // Validate header row
+            Row headerRow = sheet.getRow(0);
+
+            List<String> expectedHeaders = Arrays.asList("id", "user", "email");
+
+            for (int i = 0; i < expectedHeaders.size(); i++) {
+
+                Cell cell = headerRow.getCell(i);
+
+                String actualHeader = cell != null
+                        ? cell.getStringCellValue().trim()
+                        : "";
+
+                if (!expectedHeaders.get(i).equalsIgnoreCase(actualHeader)) {
+                    return ResponseEntity.badRequest().body(
+                            String.format(
+                                    "Invalid column name at position %d. Expected '%s' but found '%s'",
+                                    i + 1,
+                                    expectedHeaders.get(i),
+                                    actualHeader));
+                }
+            }
+
+            // Process data rows
+            for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+
+                Row row = sheet.getRow(rowNum);
+
+                if (row == null) {
+                    continue;
+                }
+
+                String id = getCellValue(row.getCell(0));
+                String user = getCellValue(row.getCell(1));
+                String email = getCellValue(row.getCell(2));
+
+                System.out.println("ID: " + id);
+                System.out.println("User: " + user);
+                System.out.println("Email: " + email);
+
+                // userService.createUser(...)
+            }
         }
+
+        return ResponseEntity.ok("File uploaded successfully: " + file.getOriginalFilename());
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to upload file: " + e.getMessage());
+    }
+}
+
+    private String getCellValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf((long) cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            default -> "";
+        };
     }
 }

@@ -41,7 +41,7 @@ public class UserBasicController {
     @PostMapping("/create")
     @Operation(summary = "Create a new user", description = "Create a new user in the system")
     public ResponseEntity<User> createUser(
-            @RequestBody User user, 
+            @RequestBody User user,
             HttpServletRequest request) {
         try {
             User createdUser = userService.createUser(user, request);
